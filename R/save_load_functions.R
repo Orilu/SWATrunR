@@ -394,12 +394,14 @@ load_swat_run <- function(save_dir, variable = NULL, run = NULL,
     if(!any(has_date)) {
       message("Variables were saved without 'date' vectors.",
               " Variables will be read and returned without dates.\n")
+      date_tbl <- tibble()
+    } else {
+      date_tbl <- save_list$variables %>%
+        filter(., variable == 'date') %>%
+        mutate(id1 = as.integer(str_split(tbl_id, '\\.',
+                                          simplify = TRUE)[,1])) %>%
+        filter(id1 %in% unique(var_tbl$id1))
     }
-
-    date_tbl <- save_list$variables %>%
-      filter(., variable == 'date') %>%
-      mutate(id1 = as.integer(str_split(tbl_id, '\\.', simplify = TRUE)[,1]))
-    date_tbl <- filter(date_tbl, id1 %in% unique(var_tbl$id1))
 
     if (nrow(date_tbl) > 0) {
       date_tbl <- save_list$sim_tbl %>%

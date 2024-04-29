@@ -24,6 +24,7 @@ initialize_run_info <- function(model_setup, output, project_path, run_path) {
   run_info$simulation_log <- tibble(run_started  = now(),
                                     run_finished = ymd_hms(NA, tz = Sys.timezone()),
                                     run_time = as.period(NA),
+                                    exe_name = find_exe_file(project_path, get_os()),
                                     project_path = project_path,
                                     run_path = dirname(run_path))
 

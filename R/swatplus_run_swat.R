@@ -337,7 +337,7 @@
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom dplyr %>%
 #' @importFrom foreach foreach %dopar%
-#' @importFrom lubridate now
+#' @importFrom lubridate now rollbackward rollforward
 #' @importFrom parallel detectCores makeCluster parSapply stopCluster
 #' @importFrom processx run
 #' @importFrom purrr map map_if map_lgl
@@ -503,7 +503,7 @@ run_swatplus <- function(project_path, output, parameter = NULL,
   } else {
     opts <- list()
   }
-
+#
   sim_result <- foreach(i_run = 1:n_run,
    .packages = c("dplyr", "lubridate", "processx", "stringr"),
    .options.snow = opts) %dopar% {
@@ -545,12 +545,34 @@ run_swatplus <- function(project_path, output, parameter = NULL,
         # update_run_log(save_path, run_index[i_run], 'time_out')
       }
     } else if(nchar(msg$stderr) == 0) {
-      model_output <- read_swatplus_output(output, thread_path, add_date, split_units)
+      model_output <- read_swatplus_output(output, thread_path, split_units)
 
-      if(!is.null(save_path)) {
-        save_run(save_path, model_output, parameter, run_index, i_run, thread_id)
-        # update_run_log(save_path, run_index[i_run], 'finished')
+      has_end_date <- all(map_lgl(model_output,
+                                    ~ any(.x$date[nrow(.x)] %in%
+                                              c(ymd(end_date),
+                                                rollforward(ymd(end_date)),
+                                                rollbackward(ymd(end_date))),
+                                            na.rm = TRUE)))
+
+      if(!has_end_date) {
+        out_msg <- str_split(msg$stdout, '\r\n|\r|\n', simplify = TRUE) %>%
+          .[max(1, length(.) - 10):length(.)]
+        err_msg <- c('Error:', paste0('Simulation run is incomplete'),
+                     'Simulation run:', out_msg)
+        model_output <- err_msg
+        if(!is.null(save_path)) {
+          save_error_log(save_path, model_output, parameter, run_index, i_run)
+        }
+      } else {
+        if (!add_date) {
+          model_output <- map(model_output, ~ select(.x, - date))
+        }
+        if(!is.null(save_path)) {
+          save_run(save_path, model_output, parameter, run_index, i_run, thread_id)
+          # update_run_log(save_path, run_index[i_run], 'finished')
+        }
       }
+
     } else {
       out_msg <- str_split(msg$stdout, '\r\n|\r|\n', simplify = TRUE) %>%
         .[max(1, length(.) - 10):length(.)]

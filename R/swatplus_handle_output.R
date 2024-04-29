@@ -4,7 +4,6 @@
 #'
 #' @param output Output defined to read from the SWAT model results
 #' @param thread_path Path to respective thread where SWAT was executed
-#' @param add_date Logical wheter to add date column
 #'
 #' @importFrom dplyr arrange filter group_by group_split mutate relocate select %>%
 #' @importFrom lubridate ymd
@@ -12,13 +11,9 @@
 #' @importFrom readr fwf_positions read_fwf
 #' @keywords internal
 #'
-read_swatplus_output <- function(output, thread_path, add_date, split_units) {
+read_swatplus_output <- function(output, thread_path, split_units) {
 
-  if(add_date){
-    date_cols <- c('yr', 'mon', 'day')
-  } else {
-    date_cols <- c()
-  }
+  date_cols <- c('yr', 'mon', 'day')
 
   # Split into time series outputs and other outputs (yields, FDC)
   output_ts  <- filter(output, !file %in% c('basin_crop_yld', 'fdcout', 'mgtout') &
@@ -49,11 +44,9 @@ read_swatplus_output <- function(output, thread_path, add_date, split_units) {
                           ~ read_output_i(.x, .y, thread_path, date_cols,
                                           n_skip = 3))
 
-    if(add_date) {
-      out_tables_ts <- out_tables_ts %>%
-        map(., ~ mutate(.x, date = ymd(paste(yr,mon,day, sep = '-')), .before = 1)) %>%
-        map(., ~ select(.x, -yr, -mon, -day))
-    }
+    out_tables_ts <- out_tables_ts %>%
+      map(., ~ mutate(.x, date = ymd(paste(yr,mon,day, sep = '-')), .before = 1)) %>%
+      map(., ~ select(.x, -yr, -mon, -day))
 
     out_tables_ts <- out_tables_ts %>%
         map(., ~ add_id(.x)) %>%
@@ -100,11 +93,9 @@ read_swatplus_output <- function(output, thread_path, add_date, split_units) {
                            ~ read_output_i(.x, .y, thread_path, date_cols,
                                            add_cols = 'pesticide', n_skip = n_skip))
 
-    if(add_date) {
-      out_tables_pst <- out_tables_pst %>%
-        map(., ~ mutate(.x, date = ymd(paste(yr,mon,day, sep = '-')), .before = 1)) %>%
-        map(., ~ select(.x, -yr, -mon, -day))
-    }
+    out_tables_pst <- out_tables_pst %>%
+      map(., ~ mutate(.x, date = ymd(paste(yr,mon,day, sep = '-')), .before = 1)) %>%
+      map(., ~ select(.x, -yr, -mon, -day))
 
     out_tables_pst <- out_tables_pst %>%
         map(., ~ add_id(.x, c('unit', 'pesticide'))) %>%

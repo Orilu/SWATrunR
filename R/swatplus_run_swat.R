@@ -547,12 +547,7 @@ run_swatplus <- function(project_path, output, parameter = NULL,
     } else if(nchar(msg$stderr) == 0) {
       model_output <- read_swatplus_output(output, thread_path, split_units)
 
-      has_end_date <- all(map_lgl(model_output,
-                                    ~ any(.x$date[nrow(.x)] %in%
-                                              c(ymd(end_date),
-                                                rollforward(ymd(end_date)),
-                                                rollbackward(ymd(end_date))),
-                                            na.rm = TRUE)))
+      has_end_date <- check_for_end_date(model_output, model_setup$end_date)
 
       if(!has_end_date) {
         out_msg <- str_split(msg$stdout, '\r\n|\r|\n', simplify = TRUE) %>%

@@ -449,3 +449,35 @@ replace_colname_na <- function(col_nm, unit_nm) {
   col_nm[is.na(col_nm)] <- unit_nm[is.na(col_nm)]
   return(col_nm)
 }
+
+#' Check model output table if it contains the end date of the simulation
+#'
+#' @param model_output model output list
+#' @param end_date End date as character or numeric value
+#'
+#' @importFrom lubridate rollbackward rollforward year ymd
+#'
+#' @keywords internal
+#'
+check_for_end_date <- function(model_output, end_date) {
+  check_dates <- c(ymd(end_date),
+                   rollforward(ymd(end_date)),
+                   rollbackward(ymd(end_date)))
+
+  has_end_date <- rep(NA, length(model_output))
+
+  for (i in 1:length(model_output)) {
+    out_i <- model_output[[i]]
+
+    if ('date' %in% names(out_i)) {
+      has_end_date[i] <- out_i$date[nrow(out_i)] %in% check_dates
+    } else if ('year' %in% names(out_i)) {
+      has_end_date[i] <- any(out_i$year %in% year(check_dates))
+    } else {
+      has_end_date[i] <- TRUE
+    }
+  }
+  has_end_date <- all(has_end_date)
+
+  return(has_end_date)
+}

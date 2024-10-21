@@ -274,7 +274,7 @@ is_par <- function(chr) {
   sep_pos <- str_locate(chr, '\\|')[,1]
   num <- chr %>% str_sub(., 1, sep_pos-1) %>%
     as_num(.)
-  has_par_name <- grepl("\\:", chr) & grepl("\\:", chr)
+  has_par_name <- grepl("\\:", chr, useBytes = TRUE)# & grepl("\\:", chr)
   is_par <- !is.na(num) & has_par_name & !is.na(sep_pos)
   return(is_par)
 }

@@ -150,6 +150,15 @@
 #'   allowed for single simulation runs (No or a single parameter set provided).
 #'   **Caution:** This option can overwrite the original model input files!
 #'
+#' @param use_exiting_cal Should the simulation run use the calibration.cal
+#'   file which is provided in the SWAT+ project folder? If `FALSE` (default)
+#'   the simulation will be either run with the defined `parameter` set or
+#'   without a calibration.cal. If `TRUE` then the calibration.cal which
+#'   already exists in the project folder will be used.
+#'
+#'   If both, `parameter` is defined and `use_existing_cal = TRUE` the simulation
+#'   will not be run.
+#'
 #' @param refresh (optional) Rewrite existing '.model_run' folder. If `TRUE`
 #'   (default value and recommended) always forces that .model_run' is newly
 #'   written when SWAT run ins started.
@@ -352,6 +361,7 @@ run_swatplus <- function(project_path, output, parameter = NULL,
                          save_path = NULL, return_output = TRUE,
                          add_parameter = TRUE, add_date = TRUE,
                          split_units = TRUE, run_in_project = FALSE,
+                         use_existing_cal = FALSE,
                          refresh = TRUE, keep_folder = FALSE,
                          quiet = FALSE, time_out = Inf) {
 
@@ -376,6 +386,17 @@ run_swatplus <- function(project_path, output, parameter = NULL,
   stopifnot(is.logical(keep_folder))
   stopifnot(is.logical(quiet))
   stopifnot(is.numeric(time_out))
+
+  if(use_existing_cal & !is.null(parameter)) {
+    stop("'use_existing_cal = TRUE' and 'parameter' is defined. ",
+         "Both at the same time is not possible.\n",
+         "Either define 'parameter' or use the existing calibration.cal file.")
+  }
+  if(use_existing_cal & !file.exists(paste0(project_path, '/calibration.cal'))) {
+    cat("'use_existing_cal = TRUE' but no 'calibration.cal' file found ",
+            "in 'project_path'.\n",
+            "Simulation will be performed without a 'calibration.cal'!\n\n")
+  }
 
   if(!return_output & is.null(save_file)) {
     stop("'return_output = FALSE' and no 'save_file' is defined. ",
@@ -518,16 +539,15 @@ run_swatplus <- function(project_path, output, parameter = NULL,
     }
     # thread_path <- run_path%//%"thread_1"
 
-        ## Modify model parameters if parameter set was provided and write
+    ## Modify model parameters if parameter set was provided and write
     ## calibration file. If no parameters provided write empty calibration file
-    if(is.null(parameter)) {
+    if(is.null(parameter) & !use_existing_cal) {
       if(file.exists(thread_path%//%"calibration.cal")) {
         file.remove(thread_path%//%"calibration.cal")
       }
-    } else {
+    } else if(!is.null(parameter)) {
       write_calibration(thread_path, parameter, model_setup$calibration.cal,
                         run_index, i_run)
-      # parameter <- parameter[c('values', 'definition')]
     }
 
     ## Execute the SWAT exe file located in the thread folder

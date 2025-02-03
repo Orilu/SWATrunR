@@ -280,8 +280,8 @@ run_swat2012 <- function(project_path, output, parameter = NULL,
           if (!is.null(params$SMTMP)) data[2, ] <- params$SMTMP
           if (!is.null(params$SMFMX)) data[3, ] <- params$SMFMX
           if (!is.null(params$SMFMN)) data[4, ] <- params$SMFMN
-	  if (!is.null(params$TIMP)) data[5, ] <- params$TIMP #missing parameter from .sno files	
-          formatted_data <- apply(data, 1, function(row) paste(sprintf("%7.3f", row), collapse = "   "))
+	        if (!is.null(params$TIMP)) data[5, ] <- params$TIMP #missing parameter from .sno files	
+          formatted_data <- apply(data, 1, function(row) paste(sprintf("%7.3f", row), collapse = " "))
           
           file_out <- gsub(".*/", "", file)
           output <- paste(thread_path,"/",file_out, sep = "")

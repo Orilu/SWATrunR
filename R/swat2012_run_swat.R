@@ -524,7 +524,59 @@ sim_result <- foreach(i_run = 1:n_run,
                                            file_meta, run_index, i_run)
       write_parameter(file_meta, thread_parameter, thread_path)
     }
+  
+    #### modification
 
+      gl_hru_modify <- function(params, project_path, i_run,thread_path) {
+        gl_file <- file.path(project_path, "gl_hru_par.txt")
+        gl_data <- read.table(gl_file, header = TRUE, sep = ",")
+      
+        params_line <- params[i_run,]
+      
+        # modificar solo filas donde hru != 0
+        for (col in names(params)) {
+          if (col %in% colnames(gl_data)) {
+            gl_data[[col]] <- ifelse(gl_data$HRU != 0, params_line[[col]], 0)
+          }
+        }
+      
+        # redondear valores a 3 decimales
+        gl_data2 <- gl_data %>% mutate(across(-HRU, ~ round(.x, digits = 3)))
+      
+        output <- paste(thread_path,"/","gl_hru_par.txt", sep = "")
+      
+        write.table(gl_data2, output , row.names = FALSE, sep = ",", quote = FALSE)
+      }
+      
+      gl_hru_modify(extra_params, project_path, i_run,thread_path)
+      
+      
+      sno_modify <- function(extra_params, project_path,i_run,thread_path) {
+        
+        sno_files <- list.files(project_path, pattern = "\\.sno$", full.names = TRUE)
+        for (file in sno_files) {
+          sno_data <- readLines(file)
+          params <- extra_params[i_run,]
+          
+          data <- read.table(text = paste(sno_data[-1], collapse = "\n"), header = FALSE)
+          if (!is.null(params$SFTMP)) data[1, ] <- params$SFTMP
+          if (!is.null(params$SMTMP)) data[2, ] <- params$SMTMP
+          if (!is.null(params$SMFMX)) data[3, ] <- params$SMFMX
+          if (!is.null(params$SMFMN)) data[4, ] <- params$SMFMN
+	        if (!is.null(params$TIMP)) data[5, ] <- params$TIMP #missing parameter from .sno files	
+          formatted_data <- apply(data, 1, function(row) paste(sprintf("%7.3f", row), collapse = " "))
+          
+          file_out <- gsub(".*/", "", file)
+          output <- paste(thread_path,"/",file_out, sep = "")
+          
+          writeLines(c(sno_data[1], formatted_data), output)
+        }
+      }
+      
+      sno_modify(extra_params, project_path, i_run,thread_path)
+      
+    }
+                                  
     ## Execute the SWAT exe file located in the thread folder
     msg <- run(run_os(swat_exe, os), wd = thread_path, error_on_status = FALSE)
 

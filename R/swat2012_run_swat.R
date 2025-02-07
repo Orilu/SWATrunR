@@ -357,7 +357,7 @@ run_swat2012 <- function(project_path, output, parameter = NULL,
                          add_parameter = TRUE, add_date = TRUE,
                          split_units = TRUE,
                          run_in_project = FALSE, refresh = TRUE,
-                         keep_folder = FALSE, quiet = FALSE) {
+                         keep_folder = FALSE, quiet = FALSE, extra_params) {   #mod
 
 #-------------------------------------------------------------------------------
   # Check settings before starting to set up '.model_run'
@@ -523,7 +523,7 @@ sim_result <- foreach(i_run = 1:n_run,
       thread_parameter <- modify_parameter(parameter, thread_parameter,
                                            file_meta, run_index, i_run)
       write_parameter(file_meta, thread_parameter, thread_path)
-    }
+    
   
     #### modification
 

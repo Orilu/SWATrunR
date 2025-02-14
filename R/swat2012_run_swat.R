@@ -393,7 +393,7 @@ run_swat2012 <- function(project_path, output, parameter = NULL,
   if(!is.null(run_index)){
     run_index <- check_run_index(run_index, parameter$values)
   } else {
-    run_index <- 1:max(nrow(parameter$values), nrow(extra_params$values) 1) #new GL
+    run_index <- 1:max(nrow(parameter$values), nrow(extra_params$values), 1) #new GL
   }
 
   ## Set the run_path based on the input arguments run_path, project_path, and

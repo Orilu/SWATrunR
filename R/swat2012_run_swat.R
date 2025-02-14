@@ -357,7 +357,7 @@ run_swat2012 <- function(project_path, output, parameter = NULL,
                          add_parameter = TRUE, add_date = TRUE,
                          split_units = TRUE,
                          run_in_project = FALSE, refresh = TRUE,
-                         keep_folder = FALSE, quiet = FALSE, extra_params) {   #mod
+                         keep_folder = FALSE, quiet = FALSE, extra_params) {   #new GL
 
 #-------------------------------------------------------------------------------
   # Check settings before starting to set up '.model_run'
@@ -393,7 +393,7 @@ run_swat2012 <- function(project_path, output, parameter = NULL,
   if(!is.null(run_index)){
     run_index <- check_run_index(run_index, parameter$values)
   } else {
-    run_index <- 1:max(nrow(parameter$values), 1)
+    run_index <- 1:max(nrow(parameter$values), nrow(extra_params$values) 1) #new GL
   }
 
   ## Set the run_path based on the input arguments run_path, project_path, and
@@ -525,7 +525,7 @@ sim_result <- foreach(i_run = 1:n_run,
       write_parameter(file_meta, thread_parameter, thread_path)
     
   
-    #### modification
+    #### modification new GL
 
       gl_hru_modify <- function(params, project_path, i_run,thread_path) {
         gl_file <- file.path(project_path, "gl_hru_par.txt")

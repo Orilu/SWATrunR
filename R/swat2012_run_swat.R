@@ -554,7 +554,7 @@ sim_result <- foreach(i_run = 1:n_run,
       gl_hru_modify(extra_params, project_path, run_index, i_run,thread_path)
       
       
-      sno_modify <- function(extra_params, project_path,i_run,thread_path) {
+      sno_modify <- function(extra_params, project_path,run_index,i_run,thread_path) {
 
         run_value = run_index[i_run]
         
@@ -578,7 +578,7 @@ sim_result <- foreach(i_run = 1:n_run,
         }
       }
       
-      sno_modify(extra_params, project_path, i_run,thread_path)
+      sno_modify(extra_params, project_path,run_index, i_run,thread_path)
       
     }
                                   

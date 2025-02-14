@@ -393,7 +393,7 @@ run_swat2012 <- function(project_path, output, parameter = NULL,
   if(!is.null(run_index)){
     run_index <- check_run_index(run_index, parameter$values)
   } else {
-    run_index <- 1:max(nrow(parameter$values), nrow(extra_params$values), 1) #new GL
+    run_index <- 1:max(nrow(parameter$values), 1) #new GL 
   }
 
   ## Set the run_path based on the input arguments run_path, project_path, and
@@ -527,11 +527,14 @@ sim_result <- foreach(i_run = 1:n_run,
   
     #### modification new GL
 
-      gl_hru_modify <- function(params, project_path, i_run,thread_path) {
+
+      gl_hru_modify <- function(params, project_path, run_index, i_run,thread_path) {
         gl_file <- file.path(project_path, "gl_hru_par.txt")
         gl_data <- read.table(gl_file, header = TRUE, sep = ",")
-      
-        params_line <- params[i_run,]
+
+        run_value = run_index[i_run]
+
+        params_line <- params[run_value,]
       
         # modificar solo filas donde hru != 0
         for (col in names(params)) {
@@ -548,15 +551,17 @@ sim_result <- foreach(i_run = 1:n_run,
         write.table(gl_data2, output , row.names = FALSE, sep = ",", quote = FALSE)
       }
       
-      gl_hru_modify(extra_params, project_path, i_run,thread_path)
+      gl_hru_modify(extra_params, project_path, run_index, i_run,thread_path)
       
       
       sno_modify <- function(extra_params, project_path,i_run,thread_path) {
+
+        run_value = run_index[i_run]
         
         sno_files <- list.files(project_path, pattern = "\\.sno$", full.names = TRUE)
         for (file in sno_files) {
           sno_data <- readLines(file)
-          params <- extra_params[i_run,]
+          params <- extra_params[run_value,]
           
           data <- read.table(text = paste(sno_data[-1], collapse = "\n"), header = FALSE)
           if (!is.null(params$SFTMP)) data[1, ] <- params$SFTMP

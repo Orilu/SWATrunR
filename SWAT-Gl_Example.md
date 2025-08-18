@@ -76,7 +76,7 @@ swat_lhs <- sample_lhs(swat_params, n_simulations)
 extra_lhs <- sample_lhs(extra_params, n_simulations)
 ```
 
-After this, you can run the calibration using the same code as in  `SWATrunR` using the `run swat2012`, only adding the following extra lines: "extra_params ="
+After this, you can run the calibration using the same code as in  `SWATrunR` using the `run_swat2012` function, only adding the following extra line: "extra_params ="
 
 ```r
 q_iter1<- run_swat2012(project_path = path_2012, 

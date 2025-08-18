@@ -9,7 +9,7 @@
 You can install the `SWATrunR` from the package's GitHub repository: 
 
 ```r
-# If the package remotes is not installed run first:
+# If the package remotes is not installed, run first:
 install.packages("remotes")
 
 remotes::install_github('Orilu/SWATrunR', ref = 'remove_legacy_gl')
@@ -31,7 +31,7 @@ obs1 <-""
 ```
 ## Parameter definition
 
-First, you can define the normal parameters and their respective ranges defined in the classical SWAT model, for intance:
+First, you can define the normal parameters and their respective ranges defined in the classical SWAT model, for instance:
 ```r
 swat_params <- tibble("CN2.mgt | change = pctchg" = c(-20, 20),
                       "LAT_TTIME.hru | change = absval" = c(30, 100),
@@ -57,7 +57,7 @@ extra_params <- tibble(
   TIMP = c(0.3, 0.9)
 )
 ```
-Then, you can use any paremeter sampling that you prefer, in this example we are going to use Latin Hypercube Sampling (LHS):
+Then, you can use any parameter sampling that you prefer; in this example, we are going to use Latin Hypercube Sampling (LHS):
 
 ```r
 #number of simulations
@@ -76,7 +76,7 @@ swat_lhs <- sample_lhs(swat_params, n_simulations)
 extra_lhs <- sample_lhs(extra_params, n_simulations)
 ```
 
-After this, you can run the calibration using the same code as in  `SWATrunR`using the `run swat2012`, only adding the following extra lines: "extra_params ="
+After this, you can run the calibration using the same code as in  `SWATrunR` using the `run swat2012`, only adding the following extra lines: "extra_params ="
 
 ```r
 q_iter1<- run_swat2012(project_path = path_2012, 
